@@ -1,6 +1,6 @@
-import { Schema, Types, model, models } from 'mongoose';
+import mongoose,{ Schema, Types, model } from 'mongoose';
 
-const userSchema = new Schema({
+const chatSchema = new Schema({
     name: {
         type: String,
         required: true,
@@ -23,4 +23,4 @@ const userSchema = new Schema({
     timestamps: true,
 });
 
-export const User = models.User || model('User', userSchema);
+export const Chat = mongoose.models.Chat || model('Chat', chatSchema);
