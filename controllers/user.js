@@ -12,7 +12,8 @@ export const newUser = TryCatch(
 
         const { name, username, password, bio } = req.body;
 
-        console.log(req.body);
+        const file = req.file;
+        if(!file) return next(new ErrorHandler("Please Upload Avatar",403))
 
         const avatar = {
             public_id: "dasd",
@@ -20,10 +21,7 @@ export const newUser = TryCatch(
         }
         const user = await User.create({ name, username, password, bio, avatar });
 
-        sendToken(res, user, 201, 'user created');
-
-
-        // return res.status(200).json("User Created Successfully")
+        sendToken(res, user, 201, 'User Created Successfully');
     }
 );
 
