@@ -15,6 +15,10 @@ export const sendToken = (res, user, code, message) => {
 }
 
 
-export const emitEvent=(req,event,users,data)=>{
-    console.log("Emmiting Event ",event);
+export const emitEvent = (req, event, users, data) => {
+    console.log("Emmiting Event ", event);
+}
+
+export const deleteFilesFromCloudinary = async (public_ids) => {
+
 }

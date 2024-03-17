@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import userRouter from './routes/user.js'
 import { errorMiddleware } from "./middlewares/error.js";
 import chatRouter from './routes/chat.js'
-import { createUser } from "./seeders/user.js";
+import { createGroupChats, createSingleChats, createUser } from "./seeders/user.js";
 
 config({
     path: "./.env"
@@ -24,6 +24,8 @@ app.get('/',(_,res)=>{
 app.use(errorMiddleware)
 
 // createUser(10);
+// createSingleChats();
+// createGroupChats(10);
 
 const PORT=3000;
 app.listen(PORT,()=>{

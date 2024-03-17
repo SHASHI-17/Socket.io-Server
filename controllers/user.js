@@ -21,7 +21,8 @@ export const newUser = TryCatch(
 
         // return res.status(200).json("User Created Successfully")
     }
-)
+);
+
 export const login = TryCatch(
     async (req, res, next) => {
         const { username, password } = req.body;
@@ -58,7 +59,7 @@ export const logout = TryCatch(async (req, res) => {
 
 export const searchUser = TryCatch(async (req, res) => {
 
-    const {name}=req.query;
+    const { name } = req.query;
 
 
 
