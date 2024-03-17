@@ -9,6 +9,6 @@ export const isAuthenticated = (req, _ , next) => {
 
     const decodedData = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decodedData._id;
-
+    console.log(decodedData);
     next();
 }

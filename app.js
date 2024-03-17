@@ -25,7 +25,7 @@ app.use(errorMiddleware)
 
 // createUser(10);
 // createSingleChats();
-// createGroupChats(10);
+// createGroupChats(5);
 
 const PORT=3000;
 app.listen(PORT,()=>{
