@@ -1,11 +1,11 @@
-import { ALERT, NEW_ATTACHMENT, NEW_MESSAGE_ALERT, REFETCH_CHATS } from "../constants/events.js";
+import { ALERT, NEW_MESSAGE, NEW_MESSAGE_ALERT, REFETCH_CHATS } from "../constants/events.js";
 import { getOtherMembers } from "../lib/helper.js";
 import { ErrorHandler, TryCatch } from "../middlewares/error.js";
 import { Chat } from "../models/chat.js";
 import { Message } from "../models/message.js";
 import { User } from "../models/user.js";
 
-import { deleteFilesFromCloudinary, emitEvent } from "../utils/features.js";
+import { deleteFilesFromCloudinary, emitEvent, uploadFilesToCLoudinary } from "../utils/features.js";
 
 export const newGroupChat = TryCatch(async (req, res, next) => {
     const { name, members } = req.body;
@@ -194,8 +194,10 @@ export const leaveGroup = TryCatch(async (req, res, next) => {
 
 export const sendAttachments = TryCatch(async (req, res, next) => {
     const { chatId } = req.body;
-
+    console.log('aaya');
     const files = req.files || [];
+
+    console.log(typeof files);
 
     if (files.length < 1) return next(new ErrorHandler("Please Upload attachments", 400));
 
@@ -206,8 +208,9 @@ export const sendAttachments = TryCatch(async (req, res, next) => {
     const [chat, me] = await Promise.all([Chat.findById(chatId), User.findById(req.user, "name")]);
 
     if (!chat) return next(new ErrorHandler("Chat not found", 404));
-
-    const attachments = [];
+    console.log('aay 2');
+    const attachments = await uploadFilesToCLoudinary(files);
+    console.log("dasd",attachments);
 
     const messageForDB = { content: "", attachments, sender: me._id, chat: chatId };
 
@@ -215,7 +218,7 @@ export const sendAttachments = TryCatch(async (req, res, next) => {
 
     const message = await Message.create(messageForDB);
 
-    emitEvent(req, NEW_ATTACHMENT, chat.members, { message: messageForRealTime, chat: chatId });
+    emitEvent(req, NEW_MESSAGE, chat.members, { message: messageForRealTime, chat: chatId });
     emitEvent(req, NEW_MESSAGE_ALERT, chat.members, { chatId });
 
     return res.status(200).json({

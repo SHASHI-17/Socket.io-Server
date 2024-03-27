@@ -1,6 +1,6 @@
 import { compare } from 'bcrypt';
 import { User } from '../models/user.js'
-import { cookieOptions, emitEvent, sendToken } from '../utils/features.js';
+import { cookieOptions, emitEvent, sendToken, uploadFilesToCLoudinary } from '../utils/features.js';
 import { ErrorHandler, TryCatch } from '../middlewares/error.js';
 import { Chat } from '../models/chat.js';
 import { Request } from '../models/request.js';
@@ -8,16 +8,20 @@ import { NEW_REQUEST, REFETCH_CHATS } from '../constants/events.js';
 import { getOtherMembers } from '../lib/helper.js';
 
 export const newUser = TryCatch(
-    async (req, res) => {
+    async (req, res,next) => {
 
         const { name, username, password, bio } = req.body;
 
         const file = req.file;
+
+        // console.log(req.body,req.file);
         if(!file) return next(new ErrorHandler("Please Upload Avatar",403))
 
+        const result = await uploadFilesToCLoudinary([file]);
+
         const avatar = {
-            public_id: "dasd",
-            url: "dasfa"
+            public_id: result[0].public_id,
+            url: result[0].url
         }
         const user = await User.create({ name, username, password, bio, avatar });
 
