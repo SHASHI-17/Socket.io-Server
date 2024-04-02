@@ -11,7 +11,7 @@ import { connectDB } from "./utils/dbConnect.js";
 import { createServer } from 'http';
 import { Server } from "socket.io";
 import { v4 as uuid } from "uuid";
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from "./constants/events.js";
+import { CHAT_JOINED, CHAT_LEAVED, NEW_MESSAGE, NEW_MESSAGE_ALERT, ONLINE_USERS, START_TYPING, STOP_TYPING } from "./constants/events.js";
 import { getSockets } from "./lib/helper.js";
 import { socketAuthenticator } from "./middlewares/auth.js";
 import { Message } from "./models/message.js";
@@ -31,7 +31,8 @@ cloudinary.config({
 
 export const adminSecretKey = process.env.ADMIN_SECRET_KEY || 'dasfasgakjhkasf';
 
-export const userSocketIds = new Map()
+export const userSocketIds = new Map();
+const onlineUsers = new Set();
 
 const app = express();
 const server = createServer(app);
@@ -42,7 +43,7 @@ const io = new Server(server, {
     }
 });
 
-app.set('io',io);
+app.set('io', io);
 
 app.use(express.json());
 app.use(cookieParser());
@@ -72,9 +73,11 @@ io.on("connection", async (socket) => {
 
     userSocketIds.set(user._id.toString(), socket.id.toString());
 
-    console.log(userSocketIds);
+    // console.log(userSocketIds);
 
     socket.on(NEW_MESSAGE, async ({ chatId, members, message }) => {
+
+        console.log('aa rha');
 
         const messageForRealTime = {
             content: message,
@@ -90,10 +93,11 @@ io.on("connection", async (socket) => {
             chat: chatId,
         }
 
-        console.log("Emitting",members);
+        // console.log("Emitting",members);
 
         const memberSocket = getSockets(members);
-        
+        console.log("memberSocket", memberSocket);
+
         io.to(memberSocket).emit(NEW_MESSAGE, {
             chatId, message: messageForRealTime
         });
@@ -105,15 +109,41 @@ io.on("connection", async (socket) => {
         } catch (e) {
             console.log(e.message);
         }
-    })
+    });
+
+    socket.on(START_TYPING, ({ members, chatId }) => {
+        // console.log('start - typing',members,chatId);
+        const memberSocket = getSockets(members)
+        socket.to(memberSocket).emit(START_TYPING, { chatId });
+    });
+
+    socket.on(STOP_TYPING, ({ members, chatId }) => {
+        // console.log('stop - typing',chatId);
+        const memberSocket = getSockets(members)
+        socket.to(memberSocket).emit(STOP_TYPING, { chatId });
+    });
+
+    socket.on(CHAT_JOINED, ({ userId, members }) => {
+        onlineUsers.add(userId.toString());
+        const membersSocket = getSockets(members);
+        io.to(membersSocket).emit(ONLINE_USERS,Array.from(onlineUsers));
+    });
+
+    socket.on(CHAT_LEAVED, ({ userId, members }) => {
+        onlineUsers.delete(userId.toString());
+        const membersSocket = getSockets(members);
+        io.to(membersSocket).emit(ONLINE_USERS,Array.from(onlineUsers));
+    });
 
     socket.on("disconnect", () => {
         console.log("User Disconnected");
         userSocketIds.delete(user._id.toString());
+        onlineUsers.delete(user._id.toString());
+        socket.broadcast.emit(ONLINE_USERS,Array.from(onlineUsers))
     })
 })
 
-app.use(errorMiddleware)
+app.use(errorMiddleware);
 
 // createUser(10);
 // createSingleChats();

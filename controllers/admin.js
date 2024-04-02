@@ -86,6 +86,7 @@ export const allChats = TryCatch(async (req, res, next) => {
                 creator: {
                     name: creator?.name || "None", avatar: creator?.avatar.url || ""
                 },
+                totalMembers:members.length,
                 totalMessages
             }
         })
