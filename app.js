@@ -38,7 +38,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173", "http://localhost:4173",],
+        origin: ["http://localhost:5173", "http://localhost:4173",process.env.CLIENT_URL],
         credentials: true
     }
 });
@@ -48,7 +48,7 @@ app.set('io', io);
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost:4173",],
+    origin: ["http://localhost:5173", "http://localhost:4173",process.env.CLIENT_URL],
     credentials: true
 }))
 
